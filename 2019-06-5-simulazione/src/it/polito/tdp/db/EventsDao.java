@@ -4,9 +4,14 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.Year;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
+import com.javadocmd.simplelatlng.LatLng;
+
+import it.polito.tdp.model.Distretto;
 import it.polito.tdp.model.Event;
 
 
@@ -50,6 +55,55 @@ public class EventsDao {
 
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return null ;
+		}
+	}
+
+	public List<Year> getAnni() {
+		final String sql=	"select distinct year(e.reported_date) as anno " + 
+							"from `events` as e " +
+							"order by anno";
+		List<Year> anni = new LinkedList<>();
+		try {
+			Connection conn = DBConnect.getConnection() ;
+			PreparedStatement st = conn.prepareStatement(sql) ;
+			ResultSet res = st.executeQuery() ;
+			
+			while(res.next()) {
+				anni.add(Year.of(res.getInt("anno")));
+			}
+			
+			conn.close();
+			return anni ;
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return null ;
+		}
+	}
+
+	public List<Distretto> getDistretti(Year anno) {
+		final String sql=	"select e.district_id as idDis, avg(e.geo_lat) as avgLat, avg(e.geo_lon) as avgLong " + 
+							"from `events` as e " + 
+							"where year(e.reported_date)=? " + 
+							"group by idDis";
+		List<Distretto> distretti = new LinkedList<>();
+		try {
+			Connection conn = DBConnect.getConnection() ;
+			PreparedStatement st = conn.prepareStatement(sql) ;
+			st.setInt(1, anno.getValue());
+			ResultSet res = st.executeQuery() ;
+			
+			while(res.next()) {
+				Distretto distretto = new Distretto(res.getInt("idDis"), new LatLng(res.getDouble("avgLat"), res.getDouble("avgLong")));
+				distretti.add(distretto);
+			}
+			
+			conn.close();
+			return distretti;
+
+		} catch (SQLException e) {
 			e.printStackTrace();
 			return null ;
 		}
