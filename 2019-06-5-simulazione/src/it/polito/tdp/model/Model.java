@@ -61,7 +61,7 @@ public class Model {
 			});
 			for(Distretto d1: vicini) {
 				DefaultWeightedEdge edge = grafo.getEdge(d, d1);
-				risultato+=d1.getId()+" "+grafo.getEdgeWeight(edge)+"\n";
+				risultato+="ID Distretto: "+d1.getId()+" Distanza dal centro: "+grafo.getEdgeWeight(edge)+"\n";
 			}
 		}
 		return risultato;
